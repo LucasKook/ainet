@@ -1,0 +1,14 @@
+Package: ainet
+Title: Adaptive importance elastic net
+Version: 0.0.0.9000
+Authors@R: c(person("Lucas", "Kook", role = c("aut", "cre"), 
+                    email = "lucasheinrich.kook@uzh.ch"),
+             person("Samuel", "Pawel", role = c("aut")))
+Description: Adaptive importance elastic net
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends: ranger, glmnet, SimDesign, mvnfast, pROC, tidyverse, multcomp,
+    ggpubr
