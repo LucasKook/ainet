@@ -10,3 +10,5 @@ Install `ainet` via
 remotes::install_github("LucasKook/ainet")
 ```
 
+For more information, please visit the [main
+repository](https://github.com/SamCH93/SimPaper).
