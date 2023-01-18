@@ -91,10 +91,14 @@ run_anova <- function(
     g2 <- paste0("fct", models, conds[cond])
     lfct <- paste(g1, "-", g2, "== 0")
     res <- try(glht(m, linfct = lfct))
-    if (inherits(res, "try-error"))
-      next
-    pval <- summary(res)$test$pvalues
-    cf <- confint(res)$confint
+    if (inherits(res, "try-error")) {
+      nm <- length(models)
+      pval <- rep(NA, nm)
+      cf <- cbind(Estimate = rep(NA, nm), lwr = rep(NA, nm), upr = rep(NA, nm))
+    } else {
+      pval <- summary(res)$test$pvalues
+      cf <- confint(res)$confint
+    }
     nms <- str_split(conds[cond], pattern = "[0-9]|\\.")[[1]]
     nms <- nms[nms != ""]
     nums <- str_split(conds[cond], pattern = "[a-z]|[A-Z]")[[1]]
@@ -137,6 +141,12 @@ vis_results <- function(
     mutate_at(c("n", "EPV", "prev", "rho", "sparsity"),
               ~ factor(.x, levels = sort(unique(as.numeric(as.character(.x))))))
 
+    if (save_data) {
+      write.csv(out2, file.path(outdir, paste0("anova_", xlab, ".csv")),
+                row.names = FALSE, quote = FALSE)
+    }
+
+
   rho_plot <- function(trho, tsparse) {
     ggplot(out2 %>% filter(rho == trho, sparsity == tsparse),
            aes(x = contrast, y = Estimate, ymin = lwr, ymax = upr,
@@ -156,6 +166,7 @@ vis_results <- function(
       coord_flip()
   }
 
+  try({
   lapply(unique(as.numeric(as.character(out2$sparsity))), function(sparse) {
 
     ps <- lapply(unique(as.numeric(as.character(out2$rho))), function(rho) {
@@ -169,12 +180,8 @@ vis_results <- function(
       ggsave(pnm, plot = pfs, height = 1.5 * 8.3, width = 1.5 * 11.7)
     }
 
-    if (save_data) {
-      write.csv(out2, file.path(outdir, paste0("anova_", xlab, ".csv")),
-                row.names = FALSE, quote = FALSE)
-    }
-
     pfs
+  })
   })
 
 }
