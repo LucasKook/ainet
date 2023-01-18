@@ -9,7 +9,8 @@ vis_coefs_na(
   rhos = unique(as.numeric(as.character(pdat$rho))),
   sparsities = unique(as.numeric(as.character(pdat$sparsity))),
   cf = "X.0",
-  save = TRUE
+  save = TRUE,
+  theme_fun = theme(text = element_text(size = 13.5))
 )
 }
 \description{

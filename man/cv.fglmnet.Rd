@@ -6,6 +6,23 @@
 \usage{
 cv.fglmnet(formula, data, imp_data = NULL, pen.f = NULL, nfolds = 5, ...)
 }
+\arguments{
+\item{formula}{formula; model formula}
+
+\item{data}{data.frame; data}
+
+\item{imp_data}{data.frame; optional data to compute importance out-of-sample}
+
+\item{pen.f}{function; penalty function (default is \code{NULL} and
+\code{ainet:::.vimp} is used)}
+
+\item{nfolds}{integer; number of folds}
+
+\item{...}{additional args to \code{cv.glmnet()}}
+}
+\value{
+object of class \code{"cv.glmnet"}
+}
 \description{
 cv.glmnet with formula interface
 }

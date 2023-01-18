@@ -6,6 +6,14 @@
 \usage{
 generate(condition, fixed_objects = list(ntest = 10000))
 }
+\arguments{
+\item{condition}{simulation condition}
+
+\item{fixed_objects}{fixed objects}
+}
+\value{
+simulated data (list of train, test, and coefs)
+}
 \description{
 SimDesign function for generating the data
 }

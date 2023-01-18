@@ -6,6 +6,14 @@
 \usage{
 scaledBrier(y_true, y_pred)
 }
+\arguments{
+\item{y_true}{observed outcome}
+
+\item{y_pred}{predicted outcome}
+}
+\value{
+evaluated loss at predictions and observed outcomes
+}
 \description{
 Compute scaled Brier score
 }

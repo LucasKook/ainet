@@ -6,6 +6,11 @@
 \usage{
 filter_coef(dat, cf = "X.0")
 }
+\arguments{
+\item{dat}{data.frame; simulation results}
+
+\item{cf}{character; names of coefs to filter}
+}
 \description{
 Filter coefficients from simulation results
 }

@@ -6,6 +6,20 @@
 \usage{
 \method{evaluateModel}{ranger}(m, newx, y_true, loss, ...)
 }
+\arguments{
+\item{m}{ranger object}
+
+\item{newx}{new covariate data}
+
+\item{y_true}{observed outcome}
+
+\item{loss}{loss function}
+
+\item{...}{additional args to \code{predict.ranger()}}
+}
+\value{
+evaluated loss at predictions and observed outcomes
+}
 \description{
 Evaluate ranger
 }

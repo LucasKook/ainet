@@ -13,6 +13,22 @@ generateData(
   nonlin = FALSE
 )
 }
+\arguments{
+\item{n}{integer; sample size}
+
+\item{p}{integer; number of predictors}
+
+\item{b}{numeric; vector of coefficients}
+
+\item{prev}{numeric; outcome prevalence}
+
+\item{rho}{numeric; correlation in predictors}
+
+\item{nonlin}{logical; whether to include a nonlinear effect}
+}
+\value{
+simulated data in data.frame with column "Y" and "X.1" until "X.p"
+}
 \description{
 Generate data from logistic model
 }

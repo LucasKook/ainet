@@ -8,8 +8,29 @@ vis_results(
   pdat,
   xlab = "brier",
   save = TRUE,
-  lim = range(pdat$Estimate, na.rm = TRUE)
+  lim = range(pdat$Estimate, na.rm = TRUE),
+  theme_fun = theme(text = element_text(size = 13.5)),
+  save_data = TRUE,
+  outdir = "."
 )
+}
+\arguments{
+\item{pdat}{data.frame; data to generate plots and output data from}
+
+\item{xlab}{character; x-axis label}
+
+\item{save}{logical; whether to save plots}
+
+\item{lim}{numeric; length two numeric vector to set the y-axis limits}
+
+\item{theme_fun}{ggplot 2 theme; custom theme to adjust font size etc}
+
+\item{save_data}{logical; whether to save data}
+
+\item{outdir}{character; directory in which to save results and plots}
+}
+\value{
+ggplot2 objects
 }
 \description{
 Visualize anova results

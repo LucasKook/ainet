@@ -10,6 +10,13 @@ summarize_coef(
   funs = list(mean = mean, sd = sd, n = function(.x, ...) length(na.omit(.x)))
 )
 }
+\arguments{
+\item{dat}{data.frame; simulation results}
+
+\item{svars}{character; which variables to summarize}
+
+\item{funs}{list; list of functions to apply to \code{svars}}
+}
 \description{
 Summarize coefficients from simulation results
 }

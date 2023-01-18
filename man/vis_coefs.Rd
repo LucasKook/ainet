@@ -8,7 +8,8 @@ vis_coefs(
   pdat,
   cf = "X.0",
   save = TRUE,
-  lim = range(pdat$estimate, na.rm = TRUE)
+  lim = range(pdat$estimate, na.rm = TRUE),
+  theme_fun = theme(text = element_text(size = 13.5))
 )
 }
 \description{

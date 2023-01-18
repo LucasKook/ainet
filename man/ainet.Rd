@@ -6,6 +6,23 @@
 \usage{
 ainet(formula, data, imp_data = NULL, pen.f = NULL, plot = FALSE, ...)
 }
+\arguments{
+\item{formula}{formula; model formula}
+
+\item{data}{data.frame; data}
+
+\item{imp_data}{data.frame; optional data to compute importance out-of-sample}
+
+\item{pen.f}{function; penalty function (default is \code{NULL} and
+\code{ainet:::.vimp} is used)}
+
+\item{plot}{logical; plot variance importance of \code{rf}}
+
+\item{...}{additional arguments to \code{fglmnet()}}
+}
+\value{
+object of class \code{"glmnet"}
+}
 \description{
 ainet main function
 }

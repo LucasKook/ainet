@@ -9,8 +9,25 @@ vis_calibration(
   metric = c("cslope", "clarge"),
   save = TRUE,
   lim = c(-100, 100),
-  only_one = FALSE
+  only_one = FALSE,
+  theme_fun = theme(text = element_text(size = 13.5))
 )
+}
+\arguments{
+\item{pdat}{data.frame; data for plotting}
+
+\item{metric}{character; calibration slope or calibration in the large}
+
+\item{save}{whether to save plots}
+
+\item{lim}{numeric; y-axis limits}
+
+\item{only_one}{logical; return only one plot}
+
+\item{theme_fun}{custom ggplot2 theme to apply to each plot}
+}
+\value{
+ggplot2 objects
 }
 \description{
 Viz calibration from simulation results

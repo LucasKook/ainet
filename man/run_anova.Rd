@@ -13,6 +13,22 @@ run_anova(
   compare_against = "AINET"
 )
 }
+\arguments{
+\item{formula}{formula; model formula of the form
+\code{estimand ~ 0 + experimental_conditions}}
+
+\item{data}{data.frame; contains columns referred to in \code{formula}}
+
+\item{conds}{character; conditions to set up contrasts}
+
+\item{models}{character; which method to compare against
+\code{compare_against}}
+
+\item{compare_against}{character; method to compare against}
+}
+\value{
+list of data.frames with anova results (pvalue, contrast, estimates)
+}
 \description{
 Analyze simulation results via anova
 }

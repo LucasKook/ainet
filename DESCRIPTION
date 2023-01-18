@@ -1,6 +1,6 @@
 Package: ainet
 Title: Adaptive importance elastic net
-Version: 0.0.0.9000
+Version: 0.0-1
 Authors@R: c(person("Lucas", "Kook", role = c("aut", "cre"), 
                     email = "lucasheinrich.kook@uzh.ch"),
              person("Samuel", "Pawel", role = c("aut")))

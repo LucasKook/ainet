@@ -6,6 +6,15 @@
 \usage{
 read_results(path, which = c("estimands", "coefs"))
 }
+\arguments{
+\item{path}{character; path to simulation results}
+
+\item{which}{character; either \code{"estimands"} or \code{"coefs"}
+are extracted from the results}
+}
+\value{
+data.frame/tibble with simulation results
+}
 \description{
 Read simulation results
 }

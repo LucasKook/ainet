@@ -2,6 +2,16 @@
 ### Data generating process
 
 #' Generate data from logistic model
+#'
+#' @param n integer; sample size
+#' @param p integer; number of predictors
+#' @param b numeric; vector of coefficients
+#' @param prev numeric; outcome prevalence
+#' @param rho numeric; correlation in predictors
+#' @param nonlin logical; whether to include a nonlinear effect
+#'
+#' @return simulated data in data.frame with column "Y" and "X.1" until "X.p"
+#'
 #' @examples
 #' dat <- generateData(p = 5, prev = 0.01, rho = 0.5)
 #' cor(dat[,-1])
@@ -24,6 +34,11 @@ generateData <- function(n = 1e2, p = 20, b = rnorm(p), prev = 0.5, rho = 0,
 ### Evaluation
 
 #' Compute accuracy
+#'
+#' @param y_true observed outcome
+#' @param y_pred predicted outcome
+#' @return evaluated loss at predictions and observed outcomes
+#'
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
@@ -38,6 +53,10 @@ acc <- function(y_true, y_pred) {
 }
 
 #' Compute negative log-likelihood / n (log-score)
+#'
+#' @inheritParams acc
+#' @return evaluated loss at predictions and observed outcomes
+#'
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
@@ -51,6 +70,8 @@ nll <- function(y_true, y_pred) {
 }
 
 #' Compute AUC
+#' @inheritParams acc
+#' @return evaluated loss at predictions and observed outcomes
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
@@ -67,6 +88,8 @@ auroc <- function(y_true, y_pred) {
 }
 
 #' Compute Brier score
+#' @inheritParams acc
+#' @return evaluated loss at predictions and observed outcomes
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
@@ -80,6 +103,8 @@ brier <- function(y_true, y_pred) {
 }
 
 #' Compute variance of Brier score contributions
+#' @inheritParams acc
+#' @return evaluated loss at predictions and observed outcomes
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
@@ -93,6 +118,8 @@ brierVar <- function(y_true, y_pred) {
 }
 
 #' Compute scaled Brier score
+#' @inheritParams acc
+#' @return evaluated loss at predictions and observed outcomes
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
@@ -107,6 +134,8 @@ scaledBrier <- function(y_true, y_pred) {
 }
 
 #' Compute calibration slope
+#' @inheritParams acc
+#' @return evaluated loss at predictions and observed outcomes
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
@@ -121,6 +150,8 @@ calibrationSlope <- function(y_true, y_pred) {
 }
 
 #' Compute calibration in the large
+#' @inheritParams acc
+#' @return evaluated loss at predictions and observed outcomes
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
@@ -135,18 +166,34 @@ calibrationInTheLarge <- function(y_true, y_pred) {
 }
 
 #' Evaluate model at new observations with `loss`
+#'
+#' @param m model object
+#' @param newx newdata
+#' @param y_true observed outcome in newdata
+#' @param loss function; loss to evaluate model with
+#' @param ... see methods
+#' @return evaluated loss at predictions and observed outcomes
+#'
 #' @export
 evaluateModel <- function(m, newx, y_true, loss, ...) {
   UseMethod("evaluateModel")
 }
 
 #' Evaluate ranger
+#'
+#' @param m ranger object
+#' @param newx new covariate data
+#' @param y_true observed outcome
+#' @param loss loss function
+#' @param ... additional args to \code{predict.ranger()}
+#'
 #' @examples
 #' dat <- generateData()
 #' ndat <- generateData()
 #' m <- ranger(Y ~ ., data = dat, probability = TRUE)
 #' evaluateModel(m, newx = ndat, y_true = ndat$Y, loss = nll)
 #' @method evaluateModel ranger
+#' @return evaluated loss at predictions and observed outcomes
 #' @export
 evaluateModel.ranger <- function(m, newx, y_true, loss, ...) {
 	y_pred <- predict(m, data = newx, ... = ...)$predictions[, 2]
@@ -154,6 +201,13 @@ evaluateModel.ranger <- function(m, newx, y_true, loss, ...) {
 }
 
 #' Evaluate glmnet
+#'
+#' @param m object of class \code{"glmnet"}
+#' @param newx new covariate data
+#' @param y_true observed outcome
+#' @param loss loss function
+#' @param ... additional args to \code{predict.glmnet()}
+#'
 #' @examples
 #' set.seed(10)
 #' dat <- generateData()
@@ -161,6 +215,7 @@ evaluateModel.ranger <- function(m, newx, y_true, loss, ...) {
 #' m <- fglmnet(Y ~ ., data = dat, alpha = 0.5, lambda = 0.01, family = "binomial")
 #' evaluateModel(m, newx = as.matrix(ndat[,-1]), y_true = ndat$Y, loss = nll)
 #' @method evaluateModel glmnet
+#' @return evaluated loss at predictions and observed outcomes
 #' @export
 evaluateModel.glmnet <- function(m, newx, y_true, loss, ...) {
 	y_pred <- predict(m, newx = newx, type = "response", ... = ...)
@@ -170,6 +225,11 @@ evaluateModel.glmnet <- function(m, newx, y_true, loss, ...) {
 ### Sim Design Functions
 
 #' SimDesign function for generating the data
+#'
+#' @param condition simulation condition
+#' @param fixed_objects fixed objects
+#' @return simulated data (list of train, test, and coefs)
+#'
 #' @examples
 #' condition <- data.frame(n = 100, EPV = 20, sparsity = 0.9, prev = 0.01,
 #' sigma2 = 1, rho = 0.9, p = 2, nonlin = TRUE)
@@ -206,6 +266,14 @@ generate <- function(condition, fixed_objects = list(ntest = 1e4)) {
 }
 
 #' SimDesign function for analyzing simulated data
+#'
+#' @param condition condition
+#' @param dat data generated by \code{generate()}
+#' @param fixed_objects fixed objects
+#'
+#' @return list of estimates for loss and coefs (if applicable) for each
+#'    method in each condition
+#'
 #' @examples
 #' condition <- data.frame(n = 100, epv = 0.1, sigma2 = 1, p = 2, rho = 0.9,
 #' prev = 0.1)
@@ -320,6 +388,11 @@ analyze <- function(condition, dat, fixed_objects = list(ntest = 1e4)) {
 }
 
 #' SimDesign function for summarizing simulation results
+#'
+#' @param condition simulation condition
+#' @param results results obtained from \code{analyze()}
+#' @param fixed_objects fixed object
+#' @return list of summarized estimates of prediction losses and coefs
 #' @examples
 #' set.seed(123)
 #' condition <- data.frame(n = 100, epv = 10, sigma2 = 1, p = 10, rho = 0,

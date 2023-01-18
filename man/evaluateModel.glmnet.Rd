@@ -6,6 +6,20 @@
 \usage{
 \method{evaluateModel}{glmnet}(m, newx, y_true, loss, ...)
 }
+\arguments{
+\item{m}{object of class \code{"glmnet"}}
+
+\item{newx}{new covariate data}
+
+\item{y_true}{observed outcome}
+
+\item{loss}{loss function}
+
+\item{...}{additional args to \code{predict.glmnet()}}
+}
+\value{
+evaluated loss at predictions and observed outcomes
+}
 \description{
 Evaluate glmnet
 }

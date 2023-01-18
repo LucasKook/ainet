@@ -6,6 +6,16 @@
 \usage{
 summarize(condition, results, fixed_objects = NULL)
 }
+\arguments{
+\item{condition}{simulation condition}
+
+\item{results}{results obtained from \code{analyze()}}
+
+\item{fixed_objects}{fixed object}
+}
+\value{
+list of summarized estimates of prediction losses and coefs
+}
 \description{
 SimDesign function for summarizing simulation results
 }

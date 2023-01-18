@@ -1,6 +1,12 @@
 
 #' Read simulation results
 #'
+#' @param path character; path to simulation results
+#' @param which character; either \code{"estimands"} or \code{"coefs"}
+#'     are extracted from the results
+#'
+#' @return data.frame/tibble with simulation results
+#'
 #' @examples
 #' res <- read_results("inst/simResults-test/")
 #' ano <- run_anova(data = res)
@@ -57,6 +63,16 @@ read_results <- function(path, which = c("estimands", "coefs")) {
 
 #' Analyze simulation results via anova
 #'
+#' @param formula formula; model formula of the form
+#'     \code{estimand ~ 0 + experimental_conditions}
+#' @param data data.frame; contains columns referred to in \code{formula}
+#' @param conds character; conditions to set up contrasts
+#' @param models character; which method to compare against
+#'     \code{compare_against}
+#' @param compare_against character; method to compare against
+#'
+#' @return list of data.frames with anova results (pvalue, contrast, estimates)
+#'
 #' @export
 #'
 run_anova <- function(
@@ -92,12 +108,23 @@ run_anova <- function(
 
 #' Visualize anova results
 #'
+#' @param pdat data.frame; data to generate plots and output data from
+#' @param xlab character; x-axis label
+#' @param save logical; whether to save plots
+#' @param lim numeric; length two numeric vector to set the y-axis limits
+#' @param theme_fun ggplot 2 theme; custom theme to adjust font size etc
+#' @param save_data logical; whether to save data
+#' @param outdir character; directory in which to save results and plots
+#'
+#' @return ggplot2 objects
+#'
 #' @export
 #'
 vis_results <- function(
     pdat, xlab = "brier", save = TRUE,
     lim = range(pdat$Estimate, na.rm = TRUE),
-    theme_fun = theme(text = element_text(size = 13.5))
+    theme_fun = theme(text = element_text(size = 13.5)),
+    save_data = TRUE, outdir = "."
 ) {
   xxlab <- switch(xlab, "brier" = "Brier score",
                   "scaledBrier" = "scaled Brier score",
@@ -140,11 +167,88 @@ vis_results <- function(
     if (save) {
       pnm <- file.path(outdir, paste0("tie-fighter_", xlab, "_sparsity", sparse, ".pdf"))
       ggsave(pnm, plot = pfs, height = 1.5 * 8.3, width = 1.5 * 11.7)
+    }
+
+    if (save_data) {
       write.csv(out2, file.path(outdir, paste0("anova_", xlab, ".csv")),
                 row.names = FALSE, quote = FALSE)
     }
 
     pfs
+  })
+
+}
+
+# Calibration -------------------------------------------------------------
+
+#' Viz calibration from simulation results
+#'
+#' @param pdat data.frame; data for plotting
+#' @param metric character; calibration slope or calibration in the large
+#' @param save whether to save plots
+#' @param lim numeric; y-axis limits
+#' @param only_one logical; return only one plot
+#' @param theme_fun custom ggplot2 theme to apply to each plot
+#'
+#' @return ggplot2 objects
+#'
+#' @export
+#'
+vis_calibration <- function(
+    pdat, metric = c("cslope", "clarge"), save = TRUE,
+    lim = c(-100, 100), only_one = FALSE,
+    theme_fun = theme(text = element_text(size = 13.5))
+) {
+
+  metric <- match.arg(metric)
+  yint <- switch(metric, "cslope" = 1, "clarge" = 0)
+  xxlab <- switch(metric, "cslope" = "calibration slope",
+                  "clarge" = "calibration in the large")
+
+  out2 <- pdat %>%
+    bind_rows() %>%
+    mutate_at(c("n", "EPV", "prev", "rho", "sparsity"),
+              ~ factor(.x, levels = sort(unique(as.numeric(as.character(.x))))))
+
+  nadat <- out2 %>%
+    group_by(n, EPV, prev, rho, sparsity, model) %>%
+    summarise(frac_na = round(100 * mean(is.na(!!sym(metric))), 1),
+              frac_na = paste0(frac_na, "%"))
+
+  rho_plot <- function(trho, tsparse) {
+    ggplot(out2 %>% filter(rho == trho, sparsity == tsparse),
+           aes(x = model, y = !!sym(metric), color = ordered(EPV))) +
+      geom_hline(yintercept = yint, linetype = 2, alpha = 0.5) +
+      geom_boxplot(position = position_dodge(width = 0.7), outlier.size = 0.1) +
+      stat_mean(shape = 4, position = position_dodge(width = 0.7)) +
+      facet_grid(prev ~ n, labeller = label_both) +
+      geom_text(aes(y = lim[1] * 0.8, label = frac_na),
+                data = nadat %>% filter(rho == trho, sparsity == tsparse),
+                position = position_dodge(width = 0.7)) +
+      theme_bw() +
+      theme(legend.position = "top", panel.grid.major.y = element_blank()) +
+      theme_fun +
+      labs(y = xxlab, x = element_blank(),
+           subtitle = bquote(rho==~.(trho)~sparsity==~.(tsparse)), color = "EPV") +
+      coord_flip(ylim = lim)
+  }
+
+  if (only_one)
+    return(rho_plot(0.95, 0.9))
+
+
+  lapply(unique(as.numeric(as.character(out2$sparsity))), function(sparse) {
+    ps <- lapply(unique(as.numeric(as.character(out2$rho))), function(rho) {
+      rho_plot(rho, sparse)
+    })
+    pf <- ggarrange(plotlist = ps, common.legend = TRUE, ncol = 2, nrow = 2)
+
+    if (save) {
+      pnm <- file.path(outdir, paste0("calibration-", metric, "_sparsity", sparse, ".pdf"))
+      ggsave(pnm, plot = pf, height = 1.5 * 8.3, width = 1.5 * 11.7)
+    }
+
+    pf
   })
 
 }
@@ -191,6 +295,9 @@ vis_na <- function(
 
 #' Filter coefficients from simulation results
 #'
+#' @param dat data.frame; simulation results
+#' @param cf character; names of coefs to filter
+#'
 #' @export
 #'
 filter_coef <- function(dat, cf = "X.0") {
@@ -202,6 +309,10 @@ filter_coef <- function(dat, cf = "X.0") {
 }
 
 #' Summarize coefficients from simulation results
+#'
+#' @param dat data.frame; simulation results
+#' @param svars character; which variables to summarize
+#' @param funs list; list of functions to apply to \code{svars}
 #'
 #' @export
 #'
@@ -298,69 +409,4 @@ vis_coefs_na <- function(
     }
     pf
   })
-}
-
-# Calibration -------------------------------------------------------------
-
-#' Viz calibration from simulation results
-#'
-#' @export
-#'
-vis_calibration <- function(
-    pdat, metric = c("cslope", "clarge"), save = TRUE,
-    lim = c(-100, 100), only_one = FALSE,
-    theme_fun = theme(text = element_text(size = 13.5))
-) {
-
-  metric <- match.arg(metric)
-  yint <- switch(metric, "cslope" = 1, "clarge" = 0)
-  xxlab <- switch(metric, "cslope" = "calibration slope",
-                  "clarge" = "calibration in the large")
-
-  out2 <- pdat %>%
-    bind_rows() %>%
-    mutate_at(c("n", "EPV", "prev", "rho", "sparsity"),
-              ~ factor(.x, levels = sort(unique(as.numeric(as.character(.x))))))
-
-  nadat <- out2 %>%
-    group_by(n, EPV, prev, rho, sparsity, model) %>%
-    summarise(frac_na = round(100 * mean(is.na(!!sym(metric))), 1),
-              frac_na = paste0(frac_na, "%"))
-
-  rho_plot <- function(trho, tsparse) {
-    ggplot(out2 %>% filter(rho == trho, sparsity == tsparse),
-           aes(x = model, y = !!sym(metric), color = ordered(EPV))) +
-      geom_hline(yintercept = yint, linetype = 2, alpha = 0.5) +
-      geom_boxplot(position = position_dodge(width = 0.7), outlier.size = 0.1) +
-      stat_mean(shape = 4, position = position_dodge(width = 0.7)) +
-      facet_grid(prev ~ n, labeller = label_both) +
-      geom_text(aes(y = lim[1] * 0.8, label = frac_na),
-                data = nadat %>% filter(rho == trho, sparsity == tsparse),
-                position = position_dodge(width = 0.7)) +
-      theme_bw() +
-      theme(legend.position = "top", panel.grid.major.y = element_blank()) +
-      theme_fun +
-      labs(y = xxlab, x = element_blank(),
-           subtitle = bquote(rho==~.(trho)~sparsity==~.(tsparse)), color = "EPV") +
-      coord_flip(ylim = lim)
-  }
-
-  if (only_one)
-    return(rho_plot(0.95, 0.9))
-
-
-  lapply(unique(as.numeric(as.character(out2$sparsity))), function(sparse) {
-    ps <- lapply(unique(as.numeric(as.character(out2$rho))), function(rho) {
-      rho_plot(rho, sparse)
-    })
-    pf <- ggarrange(plotlist = ps, common.legend = TRUE, ncol = 2, nrow = 2)
-
-    if (save) {
-      pnm <- file.path(outdir, paste0("calibration-", metric, "_sparsity", sparse, ".pdf"))
-      ggsave(pnm, plot = pf, height = 1.5 * 8.3, width = 1.5 * 11.7)
-    }
-
-    pf
-  })
-
 }
