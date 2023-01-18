@@ -10,7 +10,8 @@ vis_calibration(
   save = TRUE,
   lim = c(-100, 100),
   only_one = FALSE,
-  theme_fun = theme(text = element_text(size = 13.5))
+  theme_fun = theme(text = element_text(size = 13.5)),
+  outdir = "."
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ vis_calibration(
 \item{only_one}{logical; return only one plot}
 
 \item{theme_fun}{custom ggplot2 theme to apply to each plot}
+
+\item{outdir}{character; directory in which to save results and plots}
 }
 \value{
 ggplot2 objects

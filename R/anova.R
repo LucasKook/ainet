@@ -189,6 +189,7 @@ vis_results <- function(
 #' @param lim numeric; y-axis limits
 #' @param only_one logical; return only one plot
 #' @param theme_fun custom ggplot2 theme to apply to each plot
+#' @param outdir character; directory in which to save results and plots
 #'
 #' @return ggplot2 objects
 #'
@@ -197,7 +198,8 @@ vis_results <- function(
 vis_calibration <- function(
     pdat, metric = c("cslope", "clarge"), save = TRUE,
     lim = c(-100, 100), only_one = FALSE,
-    theme_fun = theme(text = element_text(size = 13.5))
+    theme_fun = theme(text = element_text(size = 13.5)),
+    outdir = "."
 ) {
 
   metric <- match.arg(metric)
