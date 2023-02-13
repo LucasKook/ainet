@@ -1,6 +1,4 @@
-# Pitfalls and Potentials in Simulation Studies
-
-##  The `ainet` package
+# ainet <img src='man/figures/ainet.png' align="right" height="138.5" />
 
 This GitHub repository accompanies the arXiv preprint
 [arXiv:2203.13076](https://arxiv.org/abs/2203.13076).
